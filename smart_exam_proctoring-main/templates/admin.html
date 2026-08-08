@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Proctoring Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { background: #f0f2f5; }
+        .admin-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .info-grid, .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+        }
+        .timeline-box {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            background: #fbfbfb;
+            border-radius: 4px;
+        }
+        .timeline-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+
+
+
+</head>
+<body>
+
+<div style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 10000;">
+    <a href="/" class="home-btn" style="background:#2563eb; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display:flex; align-items:center; gap:6px;">
+        &#127968; Back to Login Selection
+    </a>
+</div>
+
+
+
+
+
+
+
+
+
+
+    <header>
+        <h1>Admin Portal Analytics</h1>
+        <div class="user-info">Logged in as: Administrator</div>
+    </header>
+    
+    <div class="admin-container">
+        <div style="margin-bottom: 2rem; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/export/pdf" class="btn" style="background: #e74c3c; text-decoration: none;">Export PDF Report</a>
+            <a href="/export/csv" class="btn" style="background: #2ecc71; text-decoration: none;">Export CSV Violations</a>
+            <a href="/export/zip" class="btn" style="background: #3498db; text-decoration: none;">Export Evidence ZIP</a>
+            <a href="/gallery" class="btn" style="background: #9b59b6; text-decoration: none;">Evidence Gallery</a>
+            <a href="/architecture" class="btn" style="background: #34495e; text-decoration: none;">System Architecture</a>
+        </div>
+
+        <h2>Global Enterprise Metrics</h2>
+        <div class="stats-grid" style="background: #eef2f5; padding: 1rem; border-radius: 8px;">
+            <div class="stat-card">Total Registered<div class="stat-value">{{ global_metrics.total_students }}</div></div>
+            <div class="stat-card">Active Exams<div class="stat-value">{{ global_metrics.active_exams }}</div></div>
+            <div class="stat-card">Completed Exams<div class="stat-value">{{ global_metrics.completed_exams }}</div></div>
+            <div class="stat-card">High Risk Students<div class="stat-value" style="color: red;">{{ global_metrics.high_risk_count }}</div></div>
+            <div class="stat-card">Average Risk<div class="stat-value">{{ global_metrics.average_risk }}%</div></div>
+        </div>
+
+        <h2>Top Enterprise Violations</h2>
+        <div class="timeline-box" style="margin-bottom: 2rem;">
+            {% for v in global_metrics.top_violations %}
+            <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                <strong>{{ v.type }}</strong>: <span style="color: var(--primary-color); font-weight: bold;">{{ v.count }}</span> instances
+            </div>
+            {% endfor %}
+            {% if not global_metrics.top_violations %}
+            <div style="padding: 10px; color: #888;">No violations recorded globally.</div>
+            {% endif %}
+        </div>
+
+        <h2>Individual Session Metrics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">Risk Score<div class="stat-value">{{ stats.risk_percentage }}%</div></div>
+            <div class="stat-card">Phone Violations<div class="stat-value">{{ stats.phone }}</div></div>
+            <div class="stat-card">Face Absent<div class="stat-value">{{ stats.face_absent }}</div></div>
+            <div class="stat-card">Tab Switches<div class="stat-value">{{ stats.tab_switch }}</div></div>
+            <div class="stat-card">Look Away Events<div class="stat-value">{{ admin.total_look_away_events }}</div></div>
+            <div class="stat-card">Look Away Duration<div class="stat-value">{{ admin.total_look_away_duration }} sec</div></div>
+            <div class="stat-card">Latest Look Away<div class="stat-value" style="font-size: 1rem;">{{ admin.latest_look_away }}</div></div>
+            <div class="stat-card">Voice Violations<div class="stat-value">{{ stats.voice }}</div></div>
+        </div>
+
+        <h2>Registered Students Management</h2>
+        <div class="timeline-box" style="margin-bottom: 2rem; background: white;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd;">
+                        <th style="padding: 10px;">User ID</th>
+                        <th style="padding: 10px;">Name (USN)</th>
+                        <th style="padding: 10px;">Registered</th>
+                        <th style="padding: 10px;">Face Image</th>
+                        <th style="padding: 10px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 10px; font-family: monospace;">{{ s.user_id }}</td>
+                        <td style="padding: 10px;">{{ s.student_name }}<br><small style="color: gray;">{{ s.usn }}</small></td>
+                        <td style="padding: 10px;">{{ s.registration_time.split(' ')[0] }}</td>
+                        <td style="padding: 10px;">
+                            <a href="/{{ s.face_image_path }}" target="_blank" style="color: var(--primary-color);">View Image</a>
+                        </td>
+                        <td style="padding: 10px;">
+                            <button class="btn" style="padding: 4px 8px; font-size: 0.8rem; background: #f39c12; margin-right: 5px;">Reset Pwd</button>
+                            <button class="btn" style="padding: 4px 8px; font-size: 0.8rem; background: #e74c3c;">Deactivate</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not students %}
+                    <tr><td colspan="5" style="padding: 10px; text-align: center; color: #888;">No registered students found.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Exam Sessions Replay</h2>
+        <div class="timeline-box" style="margin-bottom: 2rem; background: white;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd;">
+                        <th style="padding: 10px;">Session ID</th>
+                        <th style="padding: 10px;">Student</th>
+                        <th style="padding: 10px;">Start Time</th>
+                        <th style="padding: 10px;">Video Status</th>
+                        <th style="padding: 10px;">Replay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in exam_sessions %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 10px;">{{ s.id }}</td>
+                        <td style="padding: 10px;">{{ s.student_name }}<br><small style="color: gray;">{{ s.usn }}</small></td>
+                        <td style="padding: 10px;">{{ s.start_time }}</td>
+                        <td style="padding: 10px;">
+                            {% if s.video_path %}
+                                <span style="color: green;">Recorded</span>
+                            {% else %}
+                                <span style="color: red;">No Video</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 10px;">
+                            {% if s.video_path %}
+                            <a href="/replay?session_id={{ s.id }}" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: #27ae60; text-decoration: none;">Watch Replay</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not exam_sessions %}
+                    <tr><td colspan="5" style="padding: 10px; text-align: center; color: #888;">No exam sessions recorded.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Analytics Dashboard</h2>
+        <div id="analytics-charts" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem;">
+            <p style="color: #666; font-style: italic;">Loading AI generated analytical charts...</p>
+        </div>
+        <script>
+            fetch('/api/charts')
+                .then(res => res.json())
+                .then(charts => {
+                    const container = document.getElementById('analytics-charts');
+                    container.innerHTML = '';
+                    if (Object.keys(charts).length === 0) {
+                        container.innerHTML = '<p style="color: #888;">No data available for analytical charts.</p>';
+                        return;
+                    }
+                    for (const [key, b64] of Object.entries(charts)) {
+                        const img = document.createElement('img');
+                        img.src = b64;
+                        img.style.width = '100%';
+                        img.style.border = '1px solid #eee';
+                        img.style.borderRadius = '8px';
+                        img.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                        container.appendChild(img);
+                    }
+                })
+                .catch(err => console.error("Error loading charts:", err));
+        </script>
+
+        <h2>Global Violation Timeline</h2>
+        <div class="timeline-box">
+            {% for event in timeline %}
+                <div class="timeline-item">
+                    <strong>{{ event.timestamp }}</strong> - {{ event.type }}
+                </div>
+            {% endfor %}
+            {% if not timeline %}
+                <div style="padding: 10px; color: #888;">No violations recorded yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

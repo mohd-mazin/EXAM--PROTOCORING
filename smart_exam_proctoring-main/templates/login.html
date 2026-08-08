@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Exam Proctoring - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <a href="/login" class="btn" style="padding: 8px 15px; font-size: 14px; margin-right: 10px;">Login</a>
+        <a href="/logout" class="btn" style="padding: 8px 15px; font-size: 14px; background-color: var(--danger-color); color: white; border: none;">Logout</a>
+    </div>
+    <div class="login-container" style="animation: slide-up 0.5s ease-out;">
+        <h2 style="color: var(--primary-color);">AI Smart Exam Proctoring System</h2>
+        
+        {% if error %}
+            <p style="color: var(--danger-color); margin-bottom: 10px; font-weight: 500;">{{ error }}</p>
+        {% endif %}
+        
+        <form action="/login" method="POST" style="text-align: left;">
+            <div class="input-group">
+                <label for="user_id">User ID</label>
+                <input type="text" id="user_id" name="user_id" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <div style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+            <p style="margin-bottom: 0.5rem; color: #888;">Don't have an account?</p>
+            <a href="/register" class="btn" style="display: inline-block; text-decoration: none; background-color: #fff; color: var(--primary-color); border: 2px solid var(--primary-color);">Register Student</a>
+        </div>
+    </div>
+</body>
+</html>

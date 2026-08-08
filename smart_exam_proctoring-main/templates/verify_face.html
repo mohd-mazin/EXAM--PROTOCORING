@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face ID Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .webcam-container {
+            margin: 1rem 0;
+            text-align: center;
+        }
+        #videoElement {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            transform: scaleX(-1);
+        }
+        #canvasElement {
+            display: none;
+        }
+        .capture-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="login-body">
+<a href="/login" class="back-btn" title="Back to Student Login" aria-label="Back to Student Login">&#11013; Back to Student Login</a>
+
+    <div class="login-container" style="max-width: 500px;">
+        <h2>Face ID Verification</h2>
+        <p>Please look directly at the camera to verify your identity.</p>
+        
+        <div class="webcam-container">
+            <video id="videoElement" autoplay playsinline></video>
+            <canvas id="canvasElement"></canvas>
+            <button type="button" id="verifyBtn" class="capture-btn">Verify Identity</button>
+            <p id="statusMsg" style="color: red; font-size: 1rem; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const statusMsg = document.getElementById('statusMsg');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                statusMsg.innerText = "Webcam access denied. Cannot proceed.";
+                verifyBtn.disabled = true;
+            });
+
+        verifyBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            
+            verifyBtn.disabled = true;
+            verifyBtn.innerText = "Verifying Identity...";
+            statusMsg.innerText = "";
+            statusMsg.style.color = 'black';
+            
+            fetch('/verify_face', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ face_image: dataUrl })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    statusMsg.style.color = 'green';
+                    statusMsg.innerText = `Identity Verified! Match Score: ${(data.confidence * 100).toFixed(1)}%`;
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    statusMsg.style.color = 'red';
+                    statusMsg.innerText = "Identity Verification Failed: " + data.error;
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerText = "Try Again";
+                }
+            })
+            .catch(err => {
+                statusMsg.style.color = 'red';
+                statusMsg.innerText = "Network error occurred.";
+                verifyBtn.disabled = false;
+                verifyBtn.innerText = "Try Again";
+            });
+        });
+    </script>
+</body>
+</html>

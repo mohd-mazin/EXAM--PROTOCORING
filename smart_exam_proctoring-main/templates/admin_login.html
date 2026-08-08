@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Exam Proctoring - Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-container" style="animation: slide-up 0.5s ease-out;">
+        <h2 style="color: var(--primary-color);">Admin Portal</h2>
+        <p style="color: #666; margin-bottom: 2rem;">Secure Access Only</p>
+        
+        {% if error %}
+            <p style="color: var(--danger-color); margin-bottom: 10px; font-weight: 500;">{{ error }}</p>
+        {% endif %}
+        
+        <form action="/admin/login" method="POST" style="text-align: left;">
+            <div class="input-group">
+                <label for="admin_id">Admin ID</label>
+                <input type="text" id="admin_id" name="admin_id" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn" style="background-color: #34495e;">Secure Login</button>
+        </form>
+        
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="/login" style="color: #888; text-decoration: none; font-size: 0.9rem;">&larr; Return to Student Login</a>
+        </div>
+    </div>
+</body>
+</html>

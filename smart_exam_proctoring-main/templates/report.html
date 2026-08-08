@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .report-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .summary-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        /* Success Card Specifics */
+        .success-card {
+            background: var(--card-bg, #fff);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 3rem auto;
+            animation: slide-up 0.5s ease-out;
+        }
+        .checkmark {
+            font-size: 5rem;
+            color: var(--success-color, #2ecc71);
+            margin-bottom: 1rem;
+            animation: fade-in 1s ease-in;
+            display: inline-block;
+        }
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+
+
+
+</head>
+<body>
+
+<div style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 10000;">
+    <a href="/" class="home-btn" style="background:#2563eb; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display:flex; align-items:center; gap:6px;">
+        &#127968; Back to Login Selection
+    </a>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+    <header>
+        <h1>Exam Final Report</h1>
+        <div class="user-info">Logged in as: Student</div>
+    </header>
+    
+    <div class="success-card">
+        <div class="checkmark">&#10004;</div>
+        <h2 style="margin-top: 0;">Exam Completed Successfully</h2>
+        <p style="color: #666; margin-bottom: 2rem;">Your session has been securely recorded and analyzed.</p>
+        
+        <div style="text-align: left; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+            <h3 style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">AI Exam Analysis</h3>
+            <div style="font-size: 0.95rem; line-height: 1.6; color: #444; margin-bottom: 1rem;">
+                <strong>LLM Summary:</strong><br>
+                {{ summary }}
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid #ddd; padding-top: 1rem;">
+                <div>
+                    <span style="display: block; font-size: 0.85rem; color: #888;">Risk Score</span>
+                    <strong style="font-size: 1.2rem; color: var(--primary-color);">{{ stats.risk_percentage }}%</strong>
+                </div>
+                <div style="text-align: right;">
+                    <span style="display: block; font-size: 0.85rem; color: #888;">Classification</span>
+                    <strong style="font-size: 1.2rem; color: {% if stats.risk_percentage > 50 %}var(--danger-color){% else %}var(--success-color){% endif %};">{{ stats.risk_label }}</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/download_report" class="btn" style="flex: 1; min-width: 200px; text-decoration: none;">Download PDF Report</a>
+            <a href="/" class="btn" style="flex: 1; min-width: 200px; text-decoration: none; background: #34495e;">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

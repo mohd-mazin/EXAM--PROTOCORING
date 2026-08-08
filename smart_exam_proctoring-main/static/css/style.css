@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4A90E2;
+    --bg-color: #F8F9FA;
+    --card-bg: #FFFFFF;
+    --text-color: #2C3E50;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Login Styles */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
+}
+
+.btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(74, 144, 226, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #357abd;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(74, 144, 226, 0.4);
+}
+
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard Styles */
+header {
+    background: var(--card-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.dashboard-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.video-section {
+    flex: 2;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.video-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.status-section {
+    flex: 1;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.status-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+/* Enhancing existing dashboard inline styles */
+.stat-card {
+    background: var(--bg-color) !important;
+    padding: 1.5rem !important;
+    border-radius: 15px !important;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.timeline-item {
+    background: #fff;
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    transform: translateX(3px);
+}
+
+.video-placeholder {
+    width: 100%;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-feed {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+}
+
+.violation-list {
+    list-style: none;
+    padding: 0;
+}
+
+.violation-list li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.status-ok {
+    color: var(--success-color);
+}
+
+.status-danger {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+
+/* Back Navigation Button */
+.back-btn {
+    position: fixed; /* Sticky on all pages */
+    top: 20px;
+    left: 20px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--card-bg);
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    border: 2px solid transparent;
+}
+.back-btn:hover, .back-btn:focus {
+    transform: translateX(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    background-color: var(--primary-color);
+    color: white;
+    outline: none;
+}
+@media (max-width: 768px) {
+    .back-btn {
+        top: 10px;
+        left: 10px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}

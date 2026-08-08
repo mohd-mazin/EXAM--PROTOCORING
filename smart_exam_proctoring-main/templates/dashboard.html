@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proctoring Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .start-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .start-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .timeline-box {
+            background: #fff;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .timeline-item {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.2rem;
+        }
+        .counters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .counter-item {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-overlay" class="start-overlay">
+        <div class="start-box">
+            <h2>Ready to Begin?</h2>
+            <p>This exam requires Fullscreen mode and browser monitoring.</p>
+            <button id="start-exam-btn" class="btn">Start Exam</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>Exam Dashboard</h1>
+        <div class="user-info">Logged in as: Student</div>
+    </header>
+    
+    <div class="dashboard-container">
+        <div class="video-section">
+            <h3 style="margin-top: 0;">Live Camera Feed</h3>
+            <div id="video-placeholder" class="video-placeholder">
+                <img src="/video_feed" class="video-feed" alt="Live Video Feed">
+            </div>
+            <div class="controls" style="margin-top: 1rem; text-align: center; width: 100%;">
+                <p style="margin: 0.5rem 0;">Status: <span id="voiceStatus" class="font-bold">Silence</span></p>
+                <p style="margin: 0.5rem 0;">Audio Level: <span id="audioLevelSpan" class="font-bold">0.00</span></p>
+                <button id="end-exam-btn" class="btn" style="margin-top: 0.5rem;">End Exam & Generate Final Report</button>
+                <div id="loading-spinner" style="display: none; margin-top: 1rem; font-weight: bold; color: var(--primary-color);">
+                    Generating AI Analysis... Please wait. <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-section">
+            <h3>Proctoring Status</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div class="stat-card" style="flex: 1;">Active Persons<div class="stat-value" id="activePersons" style="font-size: 1.2rem; color: #34495e;">0</div></div>
+                <div class="stat-card" style="flex: 1;">Active Phones<div class="stat-value" id="activePhones" style="font-size: 1.2rem; color: #34495e;">0</div></div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div class="stat-card" style="flex: 1;">Live Warning<div class="stat-value status-safe" id="warningBadge" style="font-size: 1.2rem;"><span id="liveWarning">Safe</span></div></div>
+                <div class="stat-card" style="flex: 1;">Head Direction<div class="stat-value" id="headDirection" style="font-size: 1.2rem;">Unknown</div></div>
+                <div class="stat-card" style="flex: 1;">Voice Status<div class="stat-value" id="voiceStatus" style="font-size: 1.2rem;">Monitoring...</div></div>
+            </div>
+            
+            <div class="stats-grid" style="margin-top: 15px;">
+                <div class="counter-item">Head Dir: <strong id="head-dir">Focused</strong></div>
+                <div class="counter-item">Look Aways: <span id="look-count">0</span></div>
+                <div class="counter-item">Risk Score: <strong id="risk-score">0%</strong></div>
+                <div class="counter-item">Tab Switches: <span id="tab-count">0</span></div>
+                <div class="counter-item">Fullscreen Exits: <span id="fs-count">0</span></div>
+                <div class="counter-item">Key Violations: <span id="key-count">0</span></div>
+                <div class="counter-item">Face Absent: <span id="face-count">0</span></div>
+                <div class="counter-item">Phones: <span id="phone-count">0</span></div>
+                <div class="counter-item">Multiple Persons: <span id="mp-count">0</span></div>
+                <div class="counter-item">Voice: <span id="voice-count">0</span></div>
+                <div class="counter-item" style="grid-column: span 2;">External Audio: <span id="ext-audio-count">0</span></div>
+            </div>
+
+            <h4 style="margin-top: 1.5rem;">Live Timeline</h4>
+            <div id="timeline-container" class="timeline-box">
+                <!-- Live timeline populates here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

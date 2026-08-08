@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - AI Smart Exam Proctoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-layout {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .admin-sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 0;
+            z-index: 10;
+        }
+        .admin-sidebar h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            padding: 0 1rem;
+        }
+        .sidebar-link {
+            padding: 1rem 2rem;
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: var(--bg-color);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--bg-color);
+        }
+        .view-section {
+            display: none;
+            animation: fade-in 0.3s ease-in;
+        }
+        .view-section.active {
+            display: block;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        .data-table tr:hover {
+            background: #fdfdfd;
+        }
+        .chart-container {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+    </style>
+
+
+
+</head>
+<body>
+
+<div style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 10000;">
+    <a href="/" class="home-btn" style="background:#2563eb; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display:flex; align-items:center; gap:6px;">
+        &#127968; Back to Login Selection
+    </a>
+</div>
+
+
+
+
+
+
+
+
+
+
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <h2>Admin Portal</h2>
+            <a class="sidebar-link active" data-target="dashboard">Dashboard</a>
+            <a class="sidebar-link" data-target="students">Students</a>
+            <a class="sidebar-link" data-target="violations">Violations</a>
+            <a class="sidebar-link" data-target="analytics">Analytics</a>
+            <a class="sidebar-link" data-target="evidence">Evidence Gallery</a>
+            <a class="sidebar-link" data-target="live">Live Monitoring</a>
+            <a class="sidebar-link" data-target="reports">Reports</a>
+            <div style="flex:1;"></div>
+            <a href="/admin/logout" class="sidebar-link" style="color: var(--danger-color);">Logout</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard View -->
+            <div id="dashboard" class="view-section active">
+                <h2>Overview</h2>
+                <div class="dashboard-grid">
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3 style="margin-top:0; color:#888;">Total Students</h3>
+                        <div class="stat-value" id="dash-students">0</div>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3 style="margin-top:0; color:#888;">Exam Sessions</h3>
+                        <div class="stat-value" id="dash-sessions">0</div>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3 style="margin-top:0; color:#888;">Completed</h3>
+                        <div class="stat-value" id="dash-completed">0</div>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3 style="margin-top:0; color:#888;">Avg Risk Score</h3>
+                        <div class="stat-value" id="dash-risk" style="color:var(--danger-color);">0%</div>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3 style="margin-top:0; color:#888;">Total Violations</h3>
+                        <div class="stat-value" id="dash-violations">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students View -->
+            <div id="students" class="view-section">
+                <h2>Student Management</h2>
+                <table class="data-table" id="students-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>USN</th>
+                            <th>User ID</th>
+                            <th>Status</th>
+                            <th>Risk Score</th>
+                            <th>Classification</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Violations View -->
+            <div id="violations" class="view-section">
+                <h2>Violation Monitoring</h2>
+                <table class="data-table" id="violations-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Session ID</th>
+                            <th>Violation Type</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analytics" class="view-section">
+                <h2>Analytics</h2>
+                <div style="display: flex; gap: 2rem;">
+                    <div class="chart-container" style="flex: 2;">
+                        <h3 style="margin-top:0;">Violations by Type</h3>
+                        <canvas id="violationsChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="flex: 1;">
+                        <h3 style="margin-top:0;">Risk Distribution</h3>
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evidence Gallery View -->
+            <div id="evidence" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="margin: 0;">Evidence Gallery</h2>
+                    <button id="clear-evidence-btn" class="btn" style="background-color: var(--danger-color); color: white;">Delete All Evidence</button>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="evidence-filter" placeholder="Filter by type..." style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+                </div>
+                <div class="dashboard-grid" id="evidence-grid"></div>
+            </div>
+
+            <!-- Live Monitoring View -->
+            <div id="live" class="view-section">
+                <h2>Live Exam Monitoring</h2>
+                <table class="data-table" id="live-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>USN</th>
+                            <th>Current Risk</th>
+                            <th>Live Warning</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Reports View -->
+            <div id="reports" class="view-section">
+                <h2>Report Management</h2>
+                <div class="dashboard-grid">
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3>Evidence Archive</h3>
+                        <p style="color:#666; font-size:0.9rem;">Download all logs and recordings.</p>
+                        <a href="/export/zip" class="btn" style="display:inline-block; text-decoration:none; margin-top:1rem;">Download ZIP</a>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3>Violations CSV</h3>
+                        <p style="color:#666; font-size:0.9rem;">Export all telemetry data.</p>
+                        <a href="/export/csv" class="btn" style="display:inline-block; text-decoration:none; margin-top:1rem;">Download CSV</a>
+                    </div>
+                    <div class="stat-card" style="background:var(--card-bg)!important;">
+                        <h3>Global Report</h3>
+                        <p style="color:#666; font-size:0.9rem;">Generate full admin summary.</p>
+                        <a href="/export/pdf" class="btn" style="display:inline-block; text-decoration:none; margin-top:1rem;">Download PDF</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="clear-modal" class="start-overlay" style="display: none; background: rgba(0,0,0,0.5);">
+        <div class="start-box" style="background: white; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h2 style="color: var(--danger-color); margin-top: 0;">WARNING</h2>
+            <p style="color: #444; font-size: 1rem; margin-bottom: 1.5rem;">
+                This will permanently delete all evidence.
+            </p>
+            <p style="font-weight: bold; margin-bottom: 1.5rem;">Are you sure?</p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="cancel-clear-btn" class="btn" style="background-color: #95a5a6;">Cancel</button>
+                <button id="confirm-clear-btn" class="btn" style="background-color: var(--danger-color);">Clear Data</button>
+            </div>
+            
+            <div id="clear-spinner" style="display: none; margin-top: 1rem; color: var(--primary-color);">
+                Deleting evidence... <span class="spinner" style="border-left-color: var(--danger-color);"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Delete Modal -->
+    <div id="delete-single-modal" class="start-overlay" style="display: none; background: rgba(0,0,0,0.5); z-index: 2000;">
+        <div class="start-box" style="background: white; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="color: #333; margin-top: 0; margin-bottom: 1.5rem;">Are you sure you want to delete this evidence?</h3>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="cancel-single-delete-btn" class="btn" style="background-color: #95a5a6;">Cancel</button>
+                <button id="confirm-single-delete-btn" class="btn" style="background-color: var(--danger-color);">Yes Delete</button>
+            </div>
+            
+            <div id="single-delete-spinner" style="display: none; margin-top: 1rem; color: var(--primary-color);">
+                Deleting... <span class="spinner" style="border-left-color: var(--danger-color);"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

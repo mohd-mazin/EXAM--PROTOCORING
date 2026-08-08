@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Exam Proctoring - Student Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .webcam-container {
+            margin: 1rem 0;
+            text-align: center;
+        }
+        #videoElement {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        #canvasElement {
+            display: none;
+        }
+        .capture-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .capture-btn:disabled {
+            background-color: #ccc;
+        }
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .progress-indicator .step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            border-bottom: 3px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .progress-indicator .step.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="login-body">
+    <div class="login-container" style="max-width: 600px; animation: slide-up 0.5s ease-out; text-align: left;">
+        <h2 style="text-align: center; color: var(--primary-color);">Student Registration</h2>
+        <p style="text-align: center; color: #888; margin-bottom: 2rem;">Please register to receive your credentials and setup Face ID.</p>
+        
+        <div class="progress-indicator">
+            <div class="step active">Step 1: Fill Details</div>
+            <div class="step">Step 2: Capture Face</div>
+            <div class="step">Step 3: Complete Registration</div>
+        </div>
+        
+        <form id="registerForm">
+            <div class="input-group">
+                <label for="student_name">Full Name</label>
+                <input type="text" id="student_name" name="student_name" required>
+            </div>
+            <div class="input-group">
+                <label for="usn">USN (University Seat Number)</label>
+                <input type="text" id="usn" name="usn" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="department">Department</label>
+                <input type="text" id="department" name="department" placeholder="e.g. Computer Science" required>
+            </div>
+            
+            <div class="webcam-container">
+                <p style="text-align: left; font-weight: 600; margin-bottom: 0.5rem;">Face ID Setup</p>
+                <video id="videoElement" autoplay playsinline></video>
+                <canvas id="canvasElement"></canvas>
+                <button type="button" id="captureBtn" class="btn capture-btn" style="margin-top: 1rem;">Capture Face & Register</button>
+                <p id="statusMsg" style="color: var(--danger-color); font-size: 0.9rem; margin-top: 5px;"></p>
+            </div>
+            
+            <input type="hidden" id="face_image" name="face_image">
+        </form>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="/login" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const captureBtn = document.getElementById('captureBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const form = document.getElementById('registerForm');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                statusMsg.innerText = "Webcam access denied. Cannot proceed.";
+                captureBtn.disabled = true;
+            });
+
+        captureBtn.addEventListener('click', () => {
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            
+            captureBtn.disabled = true;
+            captureBtn.innerText = "Processing...";
+            statusMsg.innerText = "";
+            
+            fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: document.getElementById('student_name').value,
+                    usn: document.getElementById('usn').value,
+                    email: document.getElementById('email').value,
+                    face_image: dataUrl
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = '/registration_success?id=' + data.student_id;
+                } else {
+                    statusMsg.innerText = data.error || "Registration failed.";
+                    captureBtn.disabled = false;
+                    captureBtn.innerText = "Capture Face & Register";
+                }
+            })
+            .catch(err => {
+                statusMsg.innerText = "Network error occurred.";
+                captureBtn.disabled = false;
+                captureBtn.innerText = "Capture Face & Register";
+            });
+        });
+    </script>
+</body>
+</html>

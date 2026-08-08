@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-container" style="max-width: 500px;">
+        <h2>Registration Successful!</h2>
+        <p>Please save your generated credentials below. You will need them to login and verify your Face ID.</p>
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin: 1rem 0; text-align: left;">
+            <p><strong>Student Name:</strong> {{ student.student_name }}</p>
+            <p><strong>USN:</strong> {{ student.usn }}</p>
+            <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd;">
+            <p><strong>Generated User ID:</strong> <span id="uid">{{ student.user_id }}</span></p>
+            <p><strong>Generated Password:</strong> <span id="pwd">{{ password }}</span></p>
+        </div>
+        
+        <button onclick="copyCreds()" class="btn" style="margin-bottom: 10px;">Copy Credentials</button>
+        <a href="/download_credentials?id={{ student.id }}" class="btn" style="background: #27ae60;">Download Credentials PDF</a>
+        <br><br>
+        <a href="/login" style="color: var(--primary-color);">Proceed to Login</a>
+    </div>
+
+    <script>
+        function copyCreds() {
+            const txt = `User ID: ${document.getElementById('uid').innerText}\nPassword: ${document.getElementById('pwd').innerText}`;
+            navigator.clipboard.writeText(txt);
+            alert("Credentials copied to clipboard!");
+        }
+    </script>
+</body>
+</html>

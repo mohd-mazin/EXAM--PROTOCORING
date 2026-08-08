@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Session Replay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .replay-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .video-panel {
+            flex: 2;
+        }
+        .timeline-panel {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .violation-card {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+        .violation-card:hover {
+            transform: scale(1.02);
+            border-left-color: #e74c3c;
+        }
+        .evidence-img {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<a href="/dashboard" class="back-btn" title="Back to Dashboard" aria-label="Back to Dashboard">&#11013; Back to Dashboard</a>
+
+    <header>
+        <h1>Exam Replay Session #{{ exam_session.id }}</h1>
+        <div class="user-info">Student: {{ exam_session.student_name }} ({{ exam_session.usn }})</div>
+    </header>
+
+    <div class="replay-container">
+        <div class="video-panel">
+            <h2>Session Video</h2>
+            <video id="examVideo" controls style="width: 100%; border-radius: 8px; border: 1px solid #ddd; background: black;">
+                <source src="/{{ exam_session.video_path }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+            <div style="margin-top: 20px;">
+                <h3>Replay Controls</h3>
+                <p>Click on any violation in the timeline to automatically jump to that point in the video.</p>
+                <a href="/admin" class="btn" style="background: #34495e;">Back to Admin Portal</a>
+            </div>
+        </div>
+        
+        <div class="timeline-panel">
+            <h2>Session Timeline</h2>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">{{ violations|length }} total violations recorded.</p>
+            
+            {% for v in violations %}
+            <div class="violation-card" onclick="seekVideo({{ v.relative_timestamp }}, this)">
+                <strong>{{ v.timestamp.split(' ')[1] }}</strong> - {{ v.violation_type }}
+                {% if v.details %}
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">{{ v.details }}</div>
+                {% endif %}
+                
+                {% if v.evidence_path %}
+                    {% if '.wav' in v.evidence_path or '.webm' in v.evidence_path %}
+                        <audio controls style="width: 100%; margin-top: 10px;">
+                            <source src="/{{ v.evidence_path }}" type="audio/webm">
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% else %}
+                        <img src="/{{ v.evidence_path }}" class="evidence-img">
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            {% if not violations %}
+            <p>No violations recorded for this session.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('examVideo');
+        
+        function seekVideo(seconds, cardElement) {
+            if (seconds !== null && seconds !== 'None' && !isNaN(seconds)) {
+                video.currentTime = parseFloat(seconds);
+                video.play();
+            }
+            
+            // Toggle evidence visibility
+            const imgs = document.querySelectorAll('.evidence-img');
+            imgs.forEach(img => img.style.display = 'none');
+            
+            const cardImg = cardElement.querySelector('.evidence-img');
+            if (cardImg) {
+                cardImg.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
